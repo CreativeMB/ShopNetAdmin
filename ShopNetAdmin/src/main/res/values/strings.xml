@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ShopNetAdmin</string>
+    <string name="default_web_client_id">1234567890-abc123def456.apps.googleusercontent.com</string>
+
+</resources>
