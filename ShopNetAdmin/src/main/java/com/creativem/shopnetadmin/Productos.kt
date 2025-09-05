@@ -1,5 +1,6 @@
 package com.creativem.shopnetadmin
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -30,16 +31,23 @@ class Productos : AppCompatActivity() {
             insets
         }
 
+        // ✅ Inicializar Firebase antes de usarlo
         mAuth = FirebaseAuth.getInstance()
         db = FirebaseDatabase.getInstance().reference
 
-        // RecyclerView
-        adapter = ProductosAdapter(listaProductos)
+        // RecyclerView con adapter y click
+        adapter = ProductosAdapter(listaProductos) { producto ->
+            val intent = Intent(this, CrearProductos::class.java)
+            intent.putExtra("producto", producto)
+            startActivity(intent)
+        }
         binding.recyclerViewProductos.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewProductos.adapter = adapter
 
+        // ✅ Ahora sí cargamos los productos
         cargarProductos()
     }
+
 
     private fun cargarProductos() {
         val idEmpresa = mAuth.currentUser?.uid ?: return

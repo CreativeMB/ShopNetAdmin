@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.creativem.shopnetadmin.databinding.CrearProductosBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import java.io.Serializable
 import java.util.*
 
 class CrearProductos : AppCompatActivity() {
@@ -20,6 +21,8 @@ class CrearProductos : AppCompatActivity() {
     private lateinit var binding: CrearProductosBinding
     private lateinit var mAuth: FirebaseAuth
     private val db = FirebaseDatabase.getInstance().reference
+
+    private var productoEditar: Producto? = null // para edición
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,21 +57,42 @@ class CrearProductos : AppCompatActivity() {
             }
         })
 
+        // 🔹 Revisar si viene un producto para editar
+        productoEditar = intent.getSerializableExtra("producto") as? Producto
+        productoEditar?.let { cargarProductoEnFormulario(it) }
+
         // Guardar producto
         binding.btnGuardarProducto.setOnClickListener {
             guardarProducto()
         }
+
         binding.tvIrProductos.setOnClickListener {
             val intent = Intent(this, Productos::class.java)
             startActivity(intent)
         }
+    }
 
+    private fun cargarProductoEnFormulario(producto: Producto) {
+        binding.etReferenciaProducto.setText(producto.referencia)
+        binding.etNombreProducto.setText(producto.nombre)
+        binding.etCategoriaProducto.setText(producto.categoria)
+        binding.etDescripcionProducto.setText(producto.descripcion)
+        binding.etValor.setText(producto.valor.toString())
+        binding.etValorPromocion.setText(producto.valorPromocion?.toString() ?: "")
+        binding.etUrlImagen.setText(producto.imagenUrl)
+        binding.switchPromocion.isChecked = producto.promocion
+        binding.switchAgotado.isChecked = producto.agotado
+
+        Glide.with(this).load(producto.imagenUrl)
+            .placeholder(R.drawable.icono)
+            .error(R.drawable.icono)
+            .into(binding.ivPreviewImagen)
     }
 
     private fun guardarProducto() {
         val referencia = binding.etReferenciaProducto.text.toString().trim()
         val nombre = binding.etNombreProducto.text.toString().trim()
-        val categoria = binding.etCategoriaProducto.text.toString().trim()  // 🔹 Nueva categoría
+        val categoria = binding.etCategoriaProducto.text.toString().trim()
         val descripcion = binding.etDescripcionProducto.text.toString().trim()
         val valor = binding.etValor.text.toString().toDoubleOrNull()
         val valorPromocion = binding.etValorPromocion.text.toString().toDoubleOrNull()
@@ -82,13 +106,13 @@ class CrearProductos : AppCompatActivity() {
         }
 
         val idEmpresa = mAuth.currentUser?.uid ?: return
-        val idProducto = db.child(idEmpresa).child("productos").push().key ?: UUID.randomUUID().toString()
+        val idProducto = productoEditar?.idProducto ?: db.child(idEmpresa).child("productos").push().key ?: UUID.randomUUID().toString()
 
         val producto = Producto(
             idProducto = idProducto,
             referencia = referencia,
             nombre = nombre,
-            categoria = categoria,   // 🔹 Guardando la categoría
+            categoria = categoria,
             descripcion = descripcion,
             valor = valor,
             valorPromocion = valorPromocion,
@@ -101,17 +125,15 @@ class CrearProductos : AppCompatActivity() {
             .setValue(producto)
             .addOnSuccessListener {
                 Toast.makeText(this, "Producto guardado ✅", Toast.LENGTH_SHORT).show()
-                limpiarFormulario()
+                if (productoEditar == null) limpiarFormulario()
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Error al guardar ❌", Toast.LENGTH_SHORT).show()
             }
     }
 
-
-
     private fun limpiarFormulario() {
-        binding.etReferenciaProducto.text?.clear() // 🔹 limpiar referencia
+        binding.etReferenciaProducto.text?.clear()
         binding.etNombreProducto.text?.clear()
         binding.etCategoriaProducto.text?.clear()
         binding.etDescripcionProducto.text?.clear()
@@ -122,5 +144,4 @@ class CrearProductos : AppCompatActivity() {
         binding.switchPromocion.isChecked = false
         binding.switchAgotado.isChecked = false
     }
-
 }

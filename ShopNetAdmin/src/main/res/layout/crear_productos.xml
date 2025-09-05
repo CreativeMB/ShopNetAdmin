@@ -201,7 +201,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Ir a Pedidos"
+                android:text="Ir a Productos"
                 android:textAllCaps="false"
                 app:cornerRadius="16dp"
                 app:iconGravity="textStart"

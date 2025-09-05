@@ -8,11 +8,21 @@ import com.bumptech.glide.Glide
 import com.creativem.shopnetadmin.databinding.ItemProductoBinding
 
 class ProductosAdapter(
-    private val listaProductos: List<Producto>
+    private val listaProductos: List<Producto>,
+    private val onProductoClick: (Producto) -> Unit // 🔹 Callback para editar
 ) : RecyclerView.Adapter<ProductosAdapter.ProductoViewHolder>() {
 
     inner class ProductoViewHolder(val binding: ItemProductoBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.root.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onProductoClick(listaProductos[position])
+                }
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductoViewHolder {
         val binding = ItemProductoBinding.inflate(

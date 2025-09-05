@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Imagen del producto -->
+        <!-- Imagen del producto con cinta "AGOTADO" -->
         <FrameLayout
             android:layout_width="120dp"
             android:layout_height="120dp">
@@ -23,22 +23,28 @@
                 android:id="@+id/ivProducto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
+                android:scaleType="fitXY"
                 android:background="@android:color/darker_gray" />
 
-            <!-- Cinta Agotado -->
+            <!-- Cinta diagonal Agotado centrada -->
             <TextView
                 android:id="@+id/tvAgotado"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:text="AGOTADO"
                 android:textColor="@android:color/white"
-                android:padding="4dp"
-                android:visibility="gone"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@color/purple_700"
                 android:rotation="-45"
-                android:layout_gravity="top|start"
-                android:textStyle="bold"/>
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:padding="4dp"
+                android:elevation="8dp"
+                android:translationX="0dp"
+                android:translationY="0dp"/>
         </FrameLayout>
+
 
         <!-- Contenido del producto -->
         <LinearLayout
