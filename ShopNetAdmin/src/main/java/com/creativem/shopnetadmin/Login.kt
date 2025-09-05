@@ -112,8 +112,8 @@ class Login : AppCompatActivity() {
 
         dbRef.get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {
-                Log.d("LoginDebug", "Perfil existente, redirigiendo a Productos")
-                startActivity(Intent(this, Productos::class.java))
+                Log.d("LoginDebug", "Perfil existente, redirigiendo a CrearProductos")
+                startActivity(Intent(this, CrearProductos::class.java))
             } else {
                 Log.d("LoginDebug", "Perfil no existe, redirigiendo a PerfilEmpresa")
                 startActivity(Intent(this, PerfilEmpresa::class.java))

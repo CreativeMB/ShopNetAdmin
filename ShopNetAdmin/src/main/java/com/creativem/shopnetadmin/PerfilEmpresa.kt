@@ -112,7 +112,7 @@ class PerfilEmpresa : AppCompatActivity() {
             .setValue(empresa)
             .addOnSuccessListener {
                 Toast.makeText(this, "Empresa guardada correctamente ✅", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, Productos::class.java))
+                startActivity(Intent(this, CrearProductos::class.java))
                 finish()
             }
             .addOnFailureListener {

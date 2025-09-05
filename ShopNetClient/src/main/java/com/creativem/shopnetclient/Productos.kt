@@ -33,7 +33,7 @@ class Productos : AppCompatActivity() {
 
         if (idEmpresa != null) {
             binding.tvTitulo.text = "Productos de $nombreEmpresa"
-            // Aquí más adelante cargaremos los productos desde Realtime Database usando idEmpresa
+            // Aquí más adelante cargaremos los crear_productos desde Realtime Database usando idEmpresa
         } else {
             Toast.makeText(this, "No se recibió la empresa", Toast.LENGTH_SHORT).show()
             finish()

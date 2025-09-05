@@ -16,7 +16,7 @@
         android:textStyle="bold"
         android:paddingBottom="8dp"/>
 
-    <!-- Aquí pondremos el RecyclerView de productos -->
+    <!-- Aquí pondremos el RecyclerView de crear_productos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerProductos"
         android:layout_width="match_parent"

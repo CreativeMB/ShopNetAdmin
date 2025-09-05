@@ -18,3 +18,16 @@ data class Empresa(
     val calificacion: Double = 0.0,   // Promedio de reseñas (ej: 4.5 estrellas)
     val portadaUrl: String = ""       // Imagen de portada/banner
 )
+data class Producto(
+    var idProducto: String = "",
+    var categoria: String = "",
+    var nombre: String = "",
+    val referencia: String = "",
+    var descripcion: String = "",
+    var valor: Double = 0.0,
+    var valorPromocion: Double? = null,
+    var imagenUrl: String = "",
+    var fechaCreacion: Long = System.currentTimeMillis(),
+    var agotado: Boolean = false,
+    var promocion: Boolean = false
+)
