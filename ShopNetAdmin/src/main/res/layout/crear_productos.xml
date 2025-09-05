@@ -174,18 +174,40 @@
                 android:layout_weight="1"
                 android:text="¿Agotado?" />
         </LinearLayout>
-
-        <!-- Botón guardar -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGuardarProducto"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar producto"
-            android:textAllCaps="false"
-            android:layout_marginTop="20dp"
-            app:cornerRadius="16dp"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp" />
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginTop="16dp"
+            android:gravity="center_horizontal">
+
+            <!-- Botón Guardar Producto -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardarProducto"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Guardar producto"
+                android:textAllCaps="false"
+                app:cornerRadius="16dp"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                android:layout_marginEnd="8dp" />
+
+            <!-- Botón Ir a Pedidos -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tvIrProductos"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Ir a Pedidos"
+                android:textAllCaps="false"
+                app:cornerRadius="16dp"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

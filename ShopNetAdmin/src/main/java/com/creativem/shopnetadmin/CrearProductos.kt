@@ -1,5 +1,6 @@
 package com.creativem.shopnetadmin
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -57,6 +58,11 @@ class CrearProductos : AppCompatActivity() {
         binding.btnGuardarProducto.setOnClickListener {
             guardarProducto()
         }
+        binding.tvIrProductos.setOnClickListener {
+            val intent = Intent(this, Productos::class.java)
+            startActivity(intent)
+        }
+
     }
 
     private fun guardarProducto() {
@@ -107,6 +113,7 @@ class CrearProductos : AppCompatActivity() {
     private fun limpiarFormulario() {
         binding.etReferenciaProducto.text?.clear() // 🔹 limpiar referencia
         binding.etNombreProducto.text?.clear()
+        binding.etCategoriaProducto.text?.clear()
         binding.etDescripcionProducto.text?.clear()
         binding.etValor.text?.clear()
         binding.etValorPromocion.text?.clear()
