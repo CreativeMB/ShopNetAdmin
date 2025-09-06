@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Imagen del producto con cinta "AGOTADO" -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <ImageView
+                android:id="@+id/ivProducto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/icono"
+                android:scaleType="fitXY"
+                android:background="@android:color/darker_gray" />
+
+            <!-- Cinta diagonal Agotado -->
+            <TextView
+                android:id="@+id/tvAgotado"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="AGOTADO"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@color/purple_700"
+                android:rotation="-45"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:padding="4dp"
+                android:elevation="8dp"/>
+
+            <!-- Precio promocional sobre la imagen -->
+            <TextView
+                android:id="@+id/tvPrecioPromocionSobreImagen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:background="#AA000000"
+                android:padding="4dp"
+                android:textSize="14sp"
+                android:layout_gravity="bottom|end"
+                android:visibility="gone"/>
+        </FrameLayout>
+
+        <!-- Información del producto -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
+
+            <!-- Nombre -->
+            <TextView
+                android:id="@+id/tvNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:text="Soy un producto nuevo"
+                android:textColor="@android:color/black"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <!-- Referencia y precio en la misma línea -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/tvReferencia"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:text="A002"
+                    android:textColor="@android:color/darker_gray"
+                    android:maxLines="1"
+                    android:ellipsize="end"/>
+
+                <TextView
+                    android:id="@+id/tvPrecio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="20000"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <!-- Descripción -->
+            <TextView
+                android:id="@+id/tvDescripcion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="mucha divercion en un solo lugar"
+                android:layout_marginTop="4dp"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

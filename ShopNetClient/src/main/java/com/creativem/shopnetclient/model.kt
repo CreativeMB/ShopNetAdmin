@@ -1,5 +1,6 @@
 package com.creativem.shopnetclient
 
+
 data class Empresa(
     val idEmpresa: String = "",
     val nombre: String = "",
@@ -16,4 +17,16 @@ data class Empresa(
     val pais: String = "",
     val horarioAtencion: String = "",
     val fechaCreacion: String = ""
+)
+data class Producto(
+    var idProducto: String = "",
+    var nombre: String = "",
+    var referencia: String = "",
+    var descripcion: String = "",
+    var valor: Int = 0,
+    var valorPromocion: Int? = null,
+    var promocion: Boolean = false,
+    var imagenUrl: String = "",
+    var agotado: Boolean = false,
+    var categoria: String = ""
 )
