@@ -20,16 +20,18 @@
             android:layout_height="wrap_content">
 
             <!-- Imagen -->
+
+            <!-- Campos al frente de la imagen -->
             <ImageView
                 android:id="@+id/ivPreviewImagen"
                 android:layout_width="0dp"
                 android:layout_height="270dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:scaleType="centerCrop"
+                android:src="@drawable/icono"
                 android:background="@android:color/darker_gray"
-                android:layout_marginEnd="8dp" />
+                android:scaleType="fitXY" />
 
-            <!-- Campos al frente de la imagen -->
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="0dp"

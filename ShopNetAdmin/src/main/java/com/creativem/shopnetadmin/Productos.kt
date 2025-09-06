@@ -1,12 +1,15 @@
 package com.creativem.shopnetadmin
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.creativem.shopnetadmin.databinding.ProductosBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -31,23 +34,29 @@ class Productos : AppCompatActivity() {
             insets
         }
 
-        // ✅ Inicializar Firebase antes de usarlo
         mAuth = FirebaseAuth.getInstance()
         db = FirebaseDatabase.getInstance().reference
 
-        // RecyclerView con adapter y click
-        adapter = ProductosAdapter(listaProductos) { producto ->
-            val intent = Intent(this, CrearProductos::class.java)
-            intent.putExtra("producto", producto)
-            startActivity(intent)
-        }
-        binding.recyclerViewProductos.layoutManager = LinearLayoutManager(this)
+        // Adapter con click y long click
+        adapter = ProductosAdapter(listaProductos,
+            onProductoClick = { producto ->
+                // Click normal: editar producto
+                val intent = Intent(this, CrearProductos::class.java)
+                intent.putExtra("producto", producto)
+                startActivity(intent)
+            },
+            onProductoLongClick = { producto ->
+                // Click largo: eliminar producto
+                mostrarDialogoEliminar(producto)
+            }
+        )
+
+        val layoutManager = GridLayoutManager(this, 2)
+        binding.recyclerViewProductos.layoutManager = layoutManager
         binding.recyclerViewProductos.adapter = adapter
 
-        // ✅ Ahora sí cargamos los productos
         cargarProductos()
     }
-
 
     private fun cargarProductos() {
         val idEmpresa = mAuth.currentUser?.uid ?: return
@@ -64,5 +73,31 @@ class Productos : AppCompatActivity() {
 
                 override fun onCancelled(error: DatabaseError) {}
             })
+    }
+
+    private fun mostrarDialogoEliminar(producto: Producto) {
+        AlertDialog.Builder(this)
+            .setTitle("Eliminar producto")
+            .setMessage("¿Deseas eliminar el producto ${producto.nombre}?")
+            .setPositiveButton("Sí") { dialog, _ ->
+                eliminarProducto(producto)
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    private fun eliminarProducto(producto: Producto) {
+        val idEmpresa = mAuth.currentUser?.uid ?: return
+        val idProducto = producto.idProducto ?: return
+
+        db.child(idEmpresa).child("productos").child(idProducto)
+            .removeValue()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Producto eliminado ✅", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Error al eliminar ❌", Toast.LENGTH_SHORT).show()
+            }
     }
 }
