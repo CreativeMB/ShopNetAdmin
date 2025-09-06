@@ -99,6 +99,8 @@ class PerfilEmpresa : AppCompatActivity() {
             logoUrl = binding.etLogoUrl.text.toString().trim(),
             portadaUrl = binding.etPortadaUrl.text.toString().trim(),
             webUrl = binding.etWeb.text.toString().trim(),
+            facebookUrl = binding.etFacebook.text.toString().trim(),      // Nuevo campo
+            instagramUrl = binding.etInstagram.text.toString().trim(),    // Nuevo campo
             direccion = direccion,
             ciudad = binding.etCiudad.text.toString().trim(),
             pais = binding.etPais.text.toString().trim(),

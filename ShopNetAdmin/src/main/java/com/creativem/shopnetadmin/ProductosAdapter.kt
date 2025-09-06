@@ -7,11 +7,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.creativem.shopnetadmin.databinding.ItemProductoBinding
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 class ProductosAdapter(
     private val listaProductos: List<Producto>,
     private val onProductoClick: (Producto) -> Unit,
-    private val onProductoLongClick: (Producto) -> Unit  // 🔹 callback para click largo
+    private val onProductoLongClick: (Producto) -> Unit
 ) : RecyclerView.Adapter<ProductosAdapter.ProductoViewHolder>() {
 
     inner class ProductoViewHolder(val binding: ItemProductoBinding) :
@@ -71,20 +74,20 @@ class ProductosAdapter(
             b.tvPrecio.visibility = View.VISIBLE
 
             if (producto.promocion && producto.valorPromocion != null) {
-                // Precio normal tachado abajo
+                // Precio normal tachado
                 b.tvPrecio.apply {
-                    text = "$${producto.valor}"
+                    text = "$${formatearPrecio(producto.valor ?: 0.0)}"
                     paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 }
-                // Precio promoción sobre la imagen, abajo derecha
+                // Precio promoción
                 b.tvPrecioPromocionSobreImagen.apply {
-                    text = "$${producto.valorPromocion}"
+                    text = "$${formatearPrecio(producto.valorPromocion ?: 0.0)}"
                     visibility = View.VISIBLE
                 }
             } else {
                 // Sin promoción
                 b.tvPrecio.apply {
-                    text = "$${producto.valor}"
+                    text = "$${formatearPrecio(producto.valor ?: 0.0)}"
                     paintFlags = paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 }
                 b.tvPrecioPromocionSobreImagen.visibility = View.GONE
@@ -93,4 +96,14 @@ class ProductosAdapter(
     }
 
     override fun getItemCount(): Int = listaProductos.size
+
+    // 🔹 Formateador de precios (sin decimales, con punto de miles)
+    private fun formatearPrecio(valor: Number): String {
+        val symbols = DecimalFormatSymbols(Locale("es", "CO"))
+        symbols.groupingSeparator = '.'
+        symbols.decimalSeparator = ','
+
+        val df = DecimalFormat("#,###", symbols)
+        return df.format(valor.toDouble())
+    }
 }

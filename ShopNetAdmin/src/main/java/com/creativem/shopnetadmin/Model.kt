@@ -11,6 +11,8 @@ data class Empresa(
     val direccion: String = "",       // Dirección física principal
     val ciudad: String = "",          // Ciudad de la empresa
     val pais: String = "",            // País
+    val facebookUrl: String,   // Nuevo
+    val instagramUrl: String,  // Nuevo
     val fechaCreacion: String = "",   // Fecha de registro en el sistema
     val descripcion: String = "",     // Descripción corta
     val categoria: String = "",       // Categoría de negocio (ej: Floristería, Restaurante)

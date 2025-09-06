@@ -2,8 +2,12 @@ package com.creativem.shopnetadmin
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -16,17 +20,25 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import java.io.Serializable
+import org.json.JSONObject
+import java.net.URL
 import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CrearProductos : AppCompatActivity() {
-    private lateinit var googleSignInClient: GoogleSignInClient
 
+    private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var binding: CrearProductosBinding
     private lateinit var mAuth: FirebaseAuth
     private val db = FirebaseDatabase.getInstance().reference
+    private var productoEditar: Producto? = null
+    private val referenciasDrive = mutableMapOf<String, String>()
 
-    private var productoEditar: Producto? = null // para edición
+    private val handler = Handler(Looper.getMainLooper())
+    private var runnable: Runnable? = null
+    private val delayMillis: Long = 800 // tiempo de espera antes de consultar Firebase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +46,6 @@ class CrearProductos : AppCompatActivity() {
         binding = CrearProductosBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Ajustar insets
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -47,54 +58,145 @@ class CrearProductos : AppCompatActivity() {
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
-
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
         binding.tvCerrarSesion.setOnClickListener {
-            // 1️⃣ Cerrar sesión de Firebase
             FirebaseAuth.getInstance().signOut()
-
-            // 2️⃣ Cerrar sesión de Google
             googleSignInClient.signOut().addOnCompleteListener {
-                // 3️⃣ Ir a Login y permitir elegir cuenta
-                val intent = Intent(this, Login::class.java)
-                startActivity(intent)
+                startActivity(Intent(this, Login::class.java))
                 finish()
             }
         }
 
-
-
-        // 🔹 Listener en el campo URL para mostrar la vista previa automática
-        binding.etUrlImagen.addTextChangedListener(object : TextWatcher {
+        cargarJSONDesdeDrive()
+        binding.etReferenciaProducto.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
             override fun afterTextChanged(s: Editable?) {
-                val urlImagen = s.toString().trim()
-                if (urlImagen.isNotEmpty()) {
+                val referencia = s.toString().trim()
+
+                // Cancelar cualquier consulta pendiente
+                runnable?.let { handler.removeCallbacks(it) }
+
+                if (referencia.isNotEmpty()) {
+                    // Programar consulta diferida para no saturar Firebase mientras se escribe
+                    runnable = Runnable { consultarReferencia(referencia) }
+                    handler.postDelayed(runnable!!, delayMillis)
+                } else {
+                    // Solo limpiar si el campo está vacío, así no borraremos productoEditar antes de tiempo
+                    productoEditar = null
+                    limpiarFormulario()
+                }
+
+                // Actualizar vista previa de imagen según JSON
+                val urlImagen = referenciasDrive[referencia]
+                if (!urlImagen.isNullOrEmpty()) {
                     Glide.with(this@CrearProductos)
                         .load(urlImagen)
                         .placeholder(R.drawable.icono)
                         .error(R.drawable.icono)
                         .into(binding.ivPreviewImagen)
+                    binding.etUrlImagen.setText(urlImagen)
                 } else {
                     binding.ivPreviewImagen.setImageDrawable(null)
                 }
             }
         })
+        binding.tvNuevoProducto.setOnClickListener {
+            // Limpiar formulario
+            limpiarFormulario()
+            // Limpiar referencia
+            binding.etReferenciaProducto.text?.clear()
+            productoEditar = null
+            ultimaReferenciaConsultada = null
+            binding.ivPreviewImagen.setImageDrawable(null)
+        }
 
-        // 🔹 Revisar si viene un producto para editar
+
         productoEditar = intent.getSerializableExtra("producto") as? Producto
         productoEditar?.let { cargarProductoEnFormulario(it) }
 
-        // Guardar producto
-        binding.btnGuardarProducto.setOnClickListener {
-            guardarProducto()
-        }
-
+        binding.btnGuardarProducto.setOnClickListener { guardarProducto() }
         binding.tvIrProductos.setOnClickListener {
-            val intent = Intent(this, Productos::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, Productos::class.java))
+        }
+    }
+
+    private var ultimaReferenciaConsultada: String? = null
+
+    private fun consultarReferencia(referencia: String) {
+        if (referencia == ultimaReferenciaConsultada) return
+        ultimaReferenciaConsultada = referencia
+
+        val idEmpresa = mAuth.currentUser?.uid ?: return
+        db.child(idEmpresa).child("productos")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                var encontrado = false
+                for (child in snapshot.children) {
+                    val producto = child.getValue(Producto::class.java)
+                    if (producto != null && producto.referencia.equals(referencia, ignoreCase = true)) {
+                        if (productoEditar?.idProducto != producto.idProducto) {
+                            productoEditar = producto
+                            cargarProductoEnFormulario(producto)
+                            Toast.makeText(this, "Producto cargado para edición ✅", Toast.LENGTH_SHORT).show()
+                        }
+                        encontrado = true
+                        break
+                    }
+                }
+                if (!encontrado) {
+                    productoEditar = null
+                    // Aquí NO limpiamos el formulario, así no se borra lo del JSON
+                    Toast.makeText(this, "Nueva referencia, listo para crear producto ✅", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Error al consultar la referencia ❌", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun configurarAutocompletado() {
+        val referencias = referenciasDrive.keys.toList()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, referencias)
+        val autoComplete = binding.etReferenciaProducto as AutoCompleteTextView
+        autoComplete.setAdapter(adapter)
+        autoComplete.threshold = 1
+
+        autoComplete.setOnItemClickListener { parent, view, position, id ->
+            val seleccion = parent.getItemAtPosition(position) as String
+            val urlImagen = referenciasDrive[seleccion]
+            if (!urlImagen.isNullOrEmpty()) {
+                Glide.with(this)
+                    .load(urlImagen)
+                    .placeholder(R.drawable.icono)
+                    .error(R.drawable.icono)
+                    .into(binding.ivPreviewImagen)
+                binding.etUrlImagen.setText(urlImagen)
+            }
+        }
+    }
+
+    private fun cargarJSONDesdeDrive() {
+        val urlJSON = "https://drive.google.com/uc?export=download&id=1mGqnHpLxP3mWUPHVUyJtSb9WiwRlaQ_C"
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val jsonText = URL(urlJSON).readText()
+                val json = JSONObject(jsonText)
+                val keys = json.keys()
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    referenciasDrive[key] = json.getString(key)
+                }
+                runOnUiThread { configurarAutocompletado() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(this@CrearProductos, "Error cargando JSON ❌", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -159,7 +261,6 @@ class CrearProductos : AppCompatActivity() {
     }
 
     private fun limpiarFormulario() {
-        binding.etReferenciaProducto.text?.clear()
         binding.etNombreProducto.text?.clear()
         binding.etCategoriaProducto.text?.clear()
         binding.etDescripcionProducto.text?.clear()

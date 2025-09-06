@@ -18,7 +18,8 @@
             android:exported="false" />
         <activity
             android:name=".CrearProductos"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".PerfilEmpresa"
             android:exported="false" />
