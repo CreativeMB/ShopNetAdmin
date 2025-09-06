@@ -11,12 +11,16 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.creativem.shopnetadmin.databinding.CrearProductosBinding
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.io.Serializable
 import java.util.*
 
 class CrearProductos : AppCompatActivity() {
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     private lateinit var binding: CrearProductosBinding
     private lateinit var mAuth: FirebaseAuth
@@ -38,6 +42,28 @@ class CrearProductos : AppCompatActivity() {
         }
 
         mAuth = FirebaseAuth.getInstance()
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        binding.tvCerrarSesion.setOnClickListener {
+            // 1️⃣ Cerrar sesión de Firebase
+            FirebaseAuth.getInstance().signOut()
+
+            // 2️⃣ Cerrar sesión de Google
+            googleSignInClient.signOut().addOnCompleteListener {
+                // 3️⃣ Ir a Login y permitir elegir cuenta
+                val intent = Intent(this, Login::class.java)
+                startActivity(intent)
+                finish()
+            }
+        }
+
+
 
         // 🔹 Listener en el campo URL para mostrar la vista previa automática
         binding.etUrlImagen.addTextChangedListener(object : TextWatcher {
