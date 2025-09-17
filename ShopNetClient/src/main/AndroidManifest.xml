@@ -32,6 +32,8 @@
             android:exported="true"></activity>
         <activity
             android:name=".WebFormActivity"
+            android:theme="@style/AppTheme.Popup"
+            android:launchMode="singleTop"
             android:exported="true">
 
         </activity>
