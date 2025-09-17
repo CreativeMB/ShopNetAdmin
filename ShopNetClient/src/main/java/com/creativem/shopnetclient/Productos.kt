@@ -59,8 +59,9 @@ class Productos : AppCompatActivity() {
 
 
         binding.fabAgregar.setOnClickListener {
-            val dialog = WebViewDialogFragment("https://www.floristerialoslirios.com/orden-compra")
-            dialog.show(supportFragmentManager, "webview_dialog")
+            val intent = Intent(this, WebFormActivity::class.java)
+            intent.putExtra("url", "https://www.floristerialoslirios.com/orden-compra")
+            startActivity(intent)
         }
 
 
