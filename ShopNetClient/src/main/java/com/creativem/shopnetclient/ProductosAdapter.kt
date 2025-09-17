@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.creativem.shopnetclient.databinding.ItemProductoBinding
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 class ProductosAdapter(
     private val listaProductos: List<Producto>
@@ -40,7 +43,7 @@ class ProductosAdapter(
         b.tvReferencia.text = producto.referencia
         b.tvDescripcion.text = producto.descripcion
 
-        // Estado de agotado
+        // Agotado
         if (producto.agotado) {
             b.tvAgotado.visibility = View.VISIBLE
             b.tvPrecio.visibility = View.GONE
@@ -52,18 +55,18 @@ class ProductosAdapter(
             if (producto.promocion && producto.valorPromocion != null) {
                 // Precio normal tachado
                 b.tvPrecio.apply {
-                    text = "$${producto.valor}"
+                    text = "$${formatearPrecio(producto.valor ?: 0.0)}"
                     paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 }
-                // Precio promocional sobre la imagen, abajo derecha
+                // Precio promoción
                 b.tvPrecioPromocionSobreImagen.apply {
-                    text = "$${producto.valorPromocion}"
+                    text = "$${formatearPrecio(producto.valorPromocion ?: 0.0)}"
                     visibility = View.VISIBLE
                 }
             } else {
                 // Sin promoción
                 b.tvPrecio.apply {
-                    text = "$${producto.valor}"
+                    text = "$${formatearPrecio(producto.valor ?: 0.0)}"
                     paintFlags = paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 }
                 b.tvPrecioPromocionSobreImagen.visibility = View.GONE
@@ -72,4 +75,13 @@ class ProductosAdapter(
     }
 
     override fun getItemCount(): Int = listaProductos.size
+
+    private fun formatearPrecio(valor: Number): String {
+        val symbols = DecimalFormatSymbols(Locale("es", "CO"))
+        symbols.groupingSeparator = '.'
+        symbols.decimalSeparator = ','
+
+        val df = DecimalFormat("#,###", symbols)
+        return df.format(valor.toDouble())
+    }
 }
