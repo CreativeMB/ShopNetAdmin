@@ -1,8 +1,11 @@
 package com.creativem.shopnetclient
 
+import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Message
+import android.view.WindowManager
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -98,49 +101,66 @@ class Productos : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
     private fun mostrarWebDialog(url: String) {
-        val builder = AlertDialog.Builder(this)
-        val inflater = layoutInflater
-        val view = inflater.inflate(R.layout.webview_dialog, null)
-        builder.setView(view)
+        val dialog = Dialog(this)
+        val view = layoutInflater.inflate(R.layout.webview_dialog, null)
+        dialog.setContentView(view)
+
+        val width = (resources.displayMetrics.widthPixels * 0.9).toInt()
+        val height = (resources.displayMetrics.heightPixels * 0.85).toInt()
+        dialog.window?.setLayout(width, height)
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        dialog.setCanceledOnTouchOutside(true)
 
         val webView = view.findViewById<WebView>(R.id.webView)
-
         webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
-        webView.settings.domStorageEnabled = true
+        webView.isFocusableInTouchMode = true
+        webView.requestFocus()
 
         webView.webChromeClient = object : WebChromeClient() {
-            // Manejar subida de archivos
+
             override fun onShowFileChooser(
                 webView: WebView?,
                 filePathCallback: ValueCallback<Array<Uri>>?,
                 fileChooserParams: FileChooserParams?
             ): Boolean {
-                this@Productos.filePathCallback?.onReceiveValue(null) // limpiar callback previo
+                this@Productos.filePathCallback?.onReceiveValue(null)
                 this@Productos.filePathCallback = filePathCallback
 
                 val intent = fileChooserParams?.createIntent()
                 try {
-                    if (intent != null) {
-                        startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE)
-                    }
+                    intent?.let { startActivityForResult(it, FILE_CHOOSER_REQUEST_CODE) }
                 } catch (e: Exception) {
                     Toast.makeText(this@Productos, "No se puede abrir el selector de archivos", Toast.LENGTH_SHORT).show()
                     return false
                 }
                 return true
             }
+
+            // Esto permite ventanas emergentes como date picker
+            override fun onCreateWindow(
+                view: WebView?,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: Message?
+            ): Boolean {
+                val newWebView = WebView(this@Productos)
+                newWebView.settings.javaScriptEnabled = true
+                newWebView.settings.domStorageEnabled = true
+                newWebView.webChromeClient = this
+                val transport = resultMsg?.obj as? WebView.WebViewTransport
+                transport?.webView = newWebView
+                resultMsg?.sendToTarget()
+                return true
+            }
         }
 
         webView.loadUrl(url)
-
-        val dialog = builder.create()
-        dialog.setCanceledOnTouchOutside(true)
         dialog.show()
     }
 
-    // Manejar resultado del selector de archivos
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
